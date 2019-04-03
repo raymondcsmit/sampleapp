@@ -10,6 +10,7 @@ using SampleApp;
 using SampleApp.Filters;
 using Newtonsoft.Json;
 using Madyan.Repo;
+using Newtonsoft.Json.Linq;
 
 namespace SampleApp.Api.Controllers
 {
@@ -24,30 +25,30 @@ namespace SampleApp.Api.Controllers
         {
             PatientRepository = _PatientRepository;
         }
-        [HttpPost("{page,pagesize}", Name = "getpatientpaged")]
+        //[HttpPost("{page,pagesize}", Name = "getpatientpaged")]
         
-        public IActionResult GetPatientPaged()
-        {
-            int page=5; int pagesize=10;
-            //throw new Exception("Please check username or password");
-            int currentPage = page;
-            int currentPageSize = pageSize;
-            //var a = DateTime.Parse("asdfasd");
+        //public IActionResult GetPatientPaged(int page, int pagesize )
+        //{
+            
+        //    //throw new Exception("Please check username or password");
+        //    int currentPage = page;
+        //    int currentPageSize = pageSize;
+        //    //var a = DateTime.Parse("asdfasd");
            
-            IEnumerable <Patient> objPatient = PatientRepository
-                .AllIncluding(c=>c.FkBasic,c=>c.FkNextOfKin, c=>c.GpDetailList).OrderBy(u => u.PatientID)
-                .Skip((currentPage - 1) * currentPageSize)
-                .Take(currentPageSize)
-                .ToList();
+        //    IEnumerable <Patient> objPatient = PatientRepository
+        //        .AllIncluding(c=>c.FkBasic,c=>c.FkNextOfKin, c=>c.GpDetailList).OrderBy(u => u.PatientID)
+        //        .Skip((currentPage - 1) * currentPageSize)
+        //        .Take(currentPageSize)
+        //        .ToList();
 
-            return new OkObjectResult(objPatient);
-        }
-        [HttpPost(Name = "getsearch")]
+        //    return new OkObjectResult(objPatient);
+        //}
+        [HttpPost("{prop}",Name = "getsearch")]
 
-        public IActionResult GetSearch(string jsonString)
+        public IActionResult GetSearch([FromBody] List<Property> prop)
         {
-            IQueryable<Patient> objPatient = PatientRepository
-               .BuildDynamicExpression(jsonString);
+            IQueryable<Patient> objPatient=   PatientRepository
+               .BuildDynamicExpression(prop, c => c.FkBasic, c => c.FkNextOfKin, c => c.GpDetailList);
 
             return new OkObjectResult(objPatient);
         }
@@ -55,7 +56,7 @@ namespace SampleApp.Api.Controllers
         //[Authorize(Policy = "Patient.view")]
         public IActionResult Get()
         {
-            IEnumerable<Patient> objPatient = PatientRepository.GetAll().ToList();
+            IEnumerable<Patient> objPatient = PatientRepository.AllIncluding(c => c.FkBasic, c => c.FkNextOfKin, c => c.GpDetailList).OrderBy(u => u.PatientID).ToList();
             return new OkObjectResult(objPatient);
         }
 

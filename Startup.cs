@@ -48,14 +48,15 @@ namespace SampleApp
                 options.AddPolicy(AllowSPACORSAccess,
                 builder =>
                 {
-                    builder.WithOrigins().AllowAnyOrigin()
+                    //builder.WithOrigins().AllowAnyOrigin()
+                    //                    .AllowAnyHeader()
+                    //                    .AllowAnyMethod();
+                    builder.WithOrigins("http://localhost:5400")
                                         .AllowAnyHeader()
                                         .AllowAnyMethod();
-                    //builder.WithOrigins("http://localhost:5400")
-                    //                    .AllowAnyHeader()                                        
-                    //                    .AllowAnyMethod();
                 });
             });
+            services.AddScoped<ModelValidationFilter>();
             services.AddTransient<IValidator<Basic>, BasicValidator>();
             services.AddTransient<IValidator<NextOfKin>, NextOfKinValidator>();
             services.AddTransient<IValidator<GpDetail>, GpDetailValidator>();
@@ -139,8 +140,10 @@ namespace SampleApp
             }
             app.UseAppExceptionMiddleware();
             app.UseHttpsRedirection();
+
+            app.UseCors(AllowSPACORSAccess);
             //app.UseStaticFiles();
-           // app.UseSpaStaticFiles();
+            // app.UseSpaStaticFiles();
 
             app.UseMvc(routes =>
             {
